@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Financial Gap Check | David Rose</title>
+
+  <style>
+    :root{
+      --blueDark:#003A70;
+      --blue:#105FA8;
+      --teal:#03746E;
+      --bg:#F6F8FB;
+      --card:#FFFFFF;
+      --text:#0F172A;
+      --muted:#475569;
+      --border:#E2E8F0;
+      --shadow: 0 10px 24px rgba(2, 6, 23, .08);
+      --radius: 18px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 15% -10%, rgba(16,95,168,.18), transparent 55%),
+        radial-gradient(1200px 600px at 90% 0%, rgba(3,116,110,.14), transparent 55%),
+        var(--bg);
+    }
+    .wrap{ max-width: 980px; margin: 28px auto; padding: 0 16px 48px; }
+    .topbar{
+      background: linear-gradient(90deg, var(--blueDark), var(--blue));
+      color:#fff;
+      border-radius: var(--radius);
+      padding: 18px 18px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow:hidden;
+    }
+    .topbar:after{
+      content:"";
+      position:absolute; inset:-120px -180px auto auto;
+      width: 420px; height: 420px; border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      transform: rotate(12deg);
+    }
+    .brandrow{
+      position: relative;
+      display:flex; align-items:flex-start; justify-content:space-between; gap: 14px;
+      flex-wrap:wrap;
+    }
+    .title{ margin: 0 0 8px; font-size: clamp(20px, 3vw, 28px); letter-spacing: .2px; }
+    .subtitle{ margin: 0; color: rgba(255,255,255,.92); max-width: 70ch; line-height: 1.35; }
+    .pillrow{ display:flex; flex-wrap:wrap; gap: 8px; margin: 12px 0 0; }
+    .pill{
+      font-size: 12px;
+      color: rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.22);
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      backdrop-filter: blur(8px);
+    }
+    .contact{
+      position: relative;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 14px;
+      padding: 12px 12px;
+      min-width: 300px;
+      backdrop-filter: blur(8px);
+    }
+    .contact strong{ display:block; font-size: 14px; letter-spacing:.2px; }
+    .contact .meta{ margin-top: 6px; font-size: 13px; color: rgba(255,255,255,.92); line-height: 1.35; }
+    .contact a{ color:#fff; text-decoration: none; border-bottom: 1px dashed rgba(255,255,255,.45); }
+    .contact a:hover{ border-bottom-style: solid; }
+
+    .grid{ margin-top: 18px; display:grid; grid-template-columns: 1fr; gap: 16px; }
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 6px 18px rgba(2, 6, 23, .06);
+      padding: 18px;
+    }
+    .sectionTitle{ display:flex; align-items:center; justify-content:space-between; gap: 12px; margin: 0 0 10px; flex-wrap:wrap; }
+    .sectionTitle h2{ margin:0; font-size: 16px; letter-spacing:.2px; }
+    .hint{ margin:0; font-size: 12px; color: var(--muted); }
+
+    .inputs{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+    @media (max-width: 720px){ .inputs{ grid-template-columns: 1fr; } }
+
+    label{ display:block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    input, select{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      font-size: 15px;
+      outline:none;
+      background:#fff;
+    }
+    input:focus, select:focus{
+      border-color: rgba(16,95,168,.55);
+      box-shadow: 0 0 0 4px rgba(16,95,168,.14);
+    }
+
+    .q{ border-top: 1px solid var(--border); padding-top: 14px; margin-top: 14px; }
+    .q:first-child{ border-top:none; padding-top:0; margin-top:0; }
+    .q h3{ margin:0 0 10px; font-size: 14px; font-weight: 650; line-height: 1.3; }
+    .choices{ display:flex; flex-wrap:wrap; gap: 10px; }
+    .choice{
+      display:inline-flex; align-items:center; gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 10px 12px;
+      cursor:pointer;
+      user-select:none;
+      background:#fff;
+    }
+    .choice input{ width:auto; }
+
+    .actions{ display:flex; gap: 10px; flex-wrap:wrap; margin-top: 16px; align-items:center; }
+    .btn{
+      appearance:none; border:none; border-radius: 14px;
+      padding: 12px 14px; font-size: 15px; font-weight: 650; cursor:pointer;
+      display:inline-flex; align-items:center; justify-content:center; gap: 10px;
+      text-decoration:none;
+    }
+    .btnPrimary{
+      color:#fff;
+      background: linear-gradient(90deg, var(--blue), var(--teal));
+      box-shadow: 0 10px 20px rgba(16,95,168,.22);
+    }
+    .btnGhost{ background:#fff; color: var(--blueDark); border: 1px solid var(--border); }
+
+    .result{ margin-top: 14px; border-radius: var(--radius); border: 1px solid var(--border); padding: 14px; background: #fff; }
+    .badge{ display:inline-flex; align-items:center; gap: 8px; padding: 8px 10px; border-radius: 999px; font-weight: 750; font-size: 13px; }
+    .green{ background: rgba(3,116,110,.10); color: var(--teal); border:1px solid rgba(3,116,110,.25); }
+    .yellow{ background: rgba(245,185,60,.18); color: #8A5A00; border:1px solid rgba(245,185,60,.35); }
+    .red{ background: rgba(220,38,38,.10); color: #B91C1C; border:1px solid rgba(220,38,38,.25); }
+
+    .small{ font-size: 12px; color: var(--muted); line-height: 1.35; margin: 10px 0 0; }
+    ul{ margin: 8px 0 0 18px; color: var(--text); }
+    .divider{ height:1px; background: var(--border); margin: 14px 0; }
+    .statusToast{ margin-top: 10px; font-size: 12px; color: var(--muted); display:none; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brandrow">
+        <div>
+          <h1 class="title">2-Minute Financial Gap Check</h1>
+          <p class="subtitle">
+            A quick self-check to spot potential gaps in income protection, planning, and long-term risks.
+            You’ll get a simple <strong>Green / Yellow / Red</strong> result instantly.
+          </p>
+          <div class="pillrow">
+            <span class="pill">Mobile-friendly</span>
+            <span class="pill">Instant result</span>
+            <span class="pill">No pressure</span>
+          </div>
+        </div>
+
+        <div class="contact">
+          <strong>David Rose — Financial Representative</strong>
+          <div class="meta">
+            <div><a href="tel:+16029267332">602.926.7332</a></div>
+            <div><a href="mailto:david.rose@mutualofomaha.com">david.rose@mutualofomaha.com</a></div>
+            <div style="margin-top:8px;">
+              <a class="btn btnPrimary" style="padding:10px 12px; border-radius:12px;"
+                 href="https://outlook.office.com/bookings/homepage" target="_blank" rel="noopener">
+                Book a quick review
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="sectionTitle">
+          <h2>Basic Info</h2>
+          <p class="hint">Used only to send you a summary if you want it.</p>
+        </div>
+
+        <div class="inputs">
+          <div>
+            <label for="name">Name</label>
+            <input id="name" type="text" placeholder="Name" autocomplete="name" />
+          </div>
+          <div>
+            <label for="email">Email</label>
+            <input id="email" type="email" placeholder="Email address" autocomplete="email" />
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <label for="ageRange">Age range</label>
+          <select id="ageRange">
+            <option value="">Select…</option>
+            <option>Under 25</option>
+            <option>25–34</option>
+            <option>35–44</option>
+            <option>45–54</option>
+            <option>55–64</option>
+            <option>65+</option>
+          </select>
+        </div>
+      </div>
+
+      <form id="gapForm" class="card">
+        <div class="sectionTitle">
+          <h2>Gap Check Questions</h2>
+          <p class="hint">Answer what best fits your current situation.</p>
+        </div>
+
+        <!-- QUESTIONS ARE NOW HARD-CODED (so they always show) -->
+        <div class="q">
+          <h3>1. If you couldn’t work for 6+ months, would you still be financially okay?</h3>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="q1" value="0" required> Yes</label>
+            <label class="choice"><input type="radio" name="q1" value="1" required> Not sure</label>
+            <label class="choice"><input type="radio" name="q1" value="2" required> No</label>
+          </div>
+        </div>
+
+        <div class="q">
+          <h3>2. Do you have coverage that would replace most of your income if you were disabled?</h3>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="q2" value="0" required> Yes</label>
+            <label class="choice"><input type="radio" name="q2" value="1" required> Not sure</label>
+            <label class="choice"><input type="radio" name="q2" value="2" required> No</label>
+          </div>
+        </div>
+
+        <div class="q">
+          <h3>3. If you passed away unexpectedly, would your family’s bills be covered for 2+ years?</h3>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="q3" value="0" required> Yes</label>
+            <label class="choice"><input type="radio" name="q3" value="1" required> Not sure</label>
+            <label class="choice"><input type="radio" name="q3" value="2" required> No</label>
+          </div>
+        </div>
+
+        <div class="q">
+          <h3>4. Have you reviewed beneficiaries in the last 2 years?</h3>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="q4" value="0" required> Yes</label>
+            <label class="choice"><input type="radio" name="q4" value="1" required> Not sure</label>
+            <label class="choice"><input type="radio" name="q4" value="2" required> No</label>
+          </div>
+        </div>
+
+        <div class="q">
+          <h3>5. Do you have 3–6 months of expenses in liquid savings?</h3>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="q5" value="0" required> Yes</label>
+            <label class="choice"><input type="radio" name="q5" value="1" required> Some</label>
+            <label class="choice"><input type="radio" name="q5" value="2" required> No</label>
+          </div>
+        </div>
+
+        <div class="q">
+          <h3>6. If your income dropped suddenly, would debt be a major problem?</h3>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="q6" value="0" required> No</label>
+            <label class="choice"><input type="radio" name="q6" value="1" required> Some</label>
+            <label class="choice"><input type="radio" name="q6" value="2" required> Yes</label>
+          </div>
+        </div>
+
+        <div class="q">
+          <h3>7. Are you relying mostly on the market for future income with no backup plan?</h3>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="q7" value="0" required> No</label>
+            <label class="choice"><input type="radio" name="q7" value="1" required> Some</label>
+            <label class="choice"><input type="radio" name="q7" value="2" required> Yes</label>
+          </div>
+        </div>
+
+        <div class="q">
+          <h3>8. If the market dropped 25%, would your plan still feel okay?</h3>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="q8" value="0" required> Yes</label>
+            <label class="choice"><input type="radio" name="q8" value="1" required> Not sure</label>
+            <label class="choice"><input type="radio" name="q8" value="2" required> No</label>
+          </div>
+        </div>
+
+        <div class="q">
+          <h3>9. Do you have a plan for long-term care costs later in life?</h3>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="q9" value="0" required> Yes</label>
+            <label class="choice"><input type="radio" name="q9" value="1" required> Not sure</label>
+            <label class="choice"><input type="radio" name="q9" value="2" required> No</label>
+          </div>
+        </div>
+
+        <div class="q">
+          <h3>10. Do you have a will or basic estate plan in place?</h3>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="q10" value="0" required> Yes</label>
+            <label class="choice"><input type="radio" name="q10" value="1" required> In progress</label>
+            <label class="choice"><input type="radio" name="q10" value="2" required> No</label>
+          </div>
+        </div>
+
+        <div class="q">
+          <h3>11. Have you done a full financial review within the last 18 months?</h3>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="q11" value="0" required> Yes</label>
+            <label class="choice"><input type="radio" name="q11" value="1" required> Not sure</label>
+            <label class="choice"><input type="radio" name="q11" value="2" required> No</label>
+          </div>
+        </div>
+
+        <div class="q">
+          <h3>12. Would you like a short summary showing any gap areas?</h3>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="q12" value="0" required> Yes</label>
+            <label class="choice"><input type="radio" name="q12" value="1" required> Maybe</label>
+            <label class="choice"><input type="radio" name="q12" value="2" required> No</label>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btnPrimary" type="submit">Get my result</button>
+          <button class="btn btnGhost" type="button" id="resetBtn">Reset</button>
+          <a class="btn btnGhost" href="https://outlook.office.com/bookings/homepage" target="_blank" rel="noopener">Book with David</a>
+        </div>
+
+        <div id="result" class="result" style="display:none;"></div>
+        <div id="statusToast" class="statusToast"></div>
+
+        <div class="divider"></div>
+        <p class="small">Educational tool only — not financial advice.</p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const APPS_SCRIPT_URL =
+      "https://script.google.com/macros/s/AKfycbx75FXFk9KnV8HXOnAcnPocIBLv5t3CUOcngxe7CU7rPsu2JL1kS1vGlWQ59izNL7dwRw/exec";
+
+    const resultEl = document.getElementById("result");
+    const statusToast = document.getElementById("statusToast");
+    const formEl = document.getElementById("gapForm");
+
+    function showStatus(msg){ statusToast.style.display = "block"; statusToast.textContent = msg; }
+    function clearStatus(){ statusToast.style.display = "none"; statusToast.textContent = ""; }
+
+    function computeScore(){
+      const qs = [
+        { name:"q1",  text:"If you couldn’t work for 6+ months, would you still be financially okay?" },
+        { name:"q2",  text:"Do you have coverage that would replace most of your income if you were disabled?" },
+        { name:"q3",  text:"If you passed away unexpectedly, would your family’s bills be covered for 2+ years?" },
+        { name:"q4",  text:"Have you reviewed beneficiaries in the last 2 years?" },
+        { name:"q5",  text:"Do you have 3–6 months of expenses in liquid savings?" },
+        { name:"q6",  text:"If your income dropped suddenly, would debt be a major problem?" },
+        { name:"q7",  text:"Are you relying mostly on the market for future income with no backup plan?" },
+        { name:"q8",  text:"If the market dropped 25%, would your plan still feel okay?" },
+        { name:"q9",  text:"Do you have a plan for long-term care costs later in life?" },
+        { name:"q10", text:"Do you have a will or basic estate plan in place?" },
+        { name:"q11", text:"Have you done a full financial review within the last 18 months?" },
+        { name:"q12", text:"Would you like a short summary showing any gap areas?" }
+      ];
+
+      let total = 0;
+      const flags = [];
+
+      qs.forEach(q => {
+        const chosen = document.querySelector('input[name="'+q.name+'"]:checked');
+        const pts = Number(chosen.value); // 0/1/2 already encoded in HTML
+        total += pts;
+        if (pts === 2) flags.push(q.text);
+      });
+
+      let tier = "Green", badgeClass = "green";
+      let note = "Overall, you look fairly solid. A quick review can confirm details and tighten any loose ends.";
+      if (total >= 7 && total <= 14) { tier = "Yellow"; badgeClass = "yellow"; note = "A few gaps may be worth reviewing. Small fixes now can prevent expensive surprises later."; }
+      if (total >= 15) { tier = "Red"; badgeClass = "red"; note = "Several areas may need attention. A short review can help prioritize the biggest risks first."; }
+
+      return { total, tier, badgeClass, note, flags: flags.slice(0,3) };
+    }
+
+    formEl.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearStatus();
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const ageRange = document.getElementById("ageRange").value;
+
+      if (!name || !email || !ageRange) {
+        alert("Please enter your name, email, and age range.");
+        return;
+      }
+
+      const { total, tier, badgeClass, note, flags } = computeScore();
+
+      const flagsHtml = flags.length
+        ? '<div style="margin-top:10px;"><strong>Top areas flagged:</strong><ul>' + flags.map(f=>'<li>'+f+'</li>').join('') + '</ul></div>'
+        : "";
+
+      resultEl.style.display = "block";
+      resultEl.innerHTML =
+        '<div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">' +
+          '<span class="badge '+badgeClass+'">Result: '+tier+'</span>' +
+          '<span style="color:#64748B; font-size:12px;">Score: '+total+'</span>' +
+        '</div>' +
+        '<div style="margin-top:10px;">'+note+'</div>' +
+        flagsHtml +
+        '<div class="small" style="margin-top:12px;">Optional next step: book a quick review (button above).</div>';
+
+      showStatus("Saving your results…");
+
+      try {
+        const resp = await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ name, email, ageRange, score: total, result: tier, flags })
+        });
+
+        const data = await resp.json();
+        if (data && data.status === "success") showStatus("Saved. You can book a quick review above if you’d like.");
+        else showStatus("Saved status unknown. If you don’t see it, please try again.");
+      } catch (err) {
+        showStatus("Couldn’t save automatically (results still shown). You can try again or book a quick review.");
+        console.log(err);
+      }
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      formEl.reset();
+      resultEl.style.display = "none";
+      clearStatus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  </script>
+</body>
+</html>
